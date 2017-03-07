@@ -13,8 +13,9 @@ x64/
 
 # Visual C++ cache files
 ipch/
+*.VC.db
 *.aps
+*.cachefile
 *.ncb
 *.opensdf
 *.sdf
-*.cachefile

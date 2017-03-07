@@ -243,6 +243,8 @@ static LRESULT CALLBACK WindowProcedure(HWND window, UINT messageId, WPARAM wPar
 	return 0;
 }
 
+#pragma warning(disable: 4459) // declaration of 'instance' hides global declaration
+
 int APIENTRY _tWinMain(HINSTANCE instance, HINSTANCE /*previousInstance*/, LPTSTR /*commandLine*/, int /*showCommand*/) {
 	::instance = instance;
 	taskbarCreatedMessageId = RegisterWindowMessage(_T("TaskbarCreated"));
