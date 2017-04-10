@@ -3,6 +3,8 @@
 #include "Dialog.h"
 #include "Entry.h"
 
+HINSTANCE g_instance;
+
 static LPCTSTR const applicationDataFolderParts[] = { _T("Adrezdi"), _T("FileSync") };
 static LPCTSTR const applicationDataPath = _T("Adrezdi\\FileSync\\Settings.txt");
 static UINT const WM_CLIPBOARD_CHANGED = WM_USER;
@@ -11,7 +13,6 @@ static UINT const WM_SHOW_ICON = WM_STATUS_NOTIFY + 1;
 
 static std::vector<Entry> entries;
 static std::set<tstring> folderPaths;
-static HINSTANCE instance;
 static HANDLE signal, port, thread;
 static UINT taskbarCreatedMessageId;
 static bool enabled;
@@ -105,7 +106,7 @@ static void AddStatusAreaIcon(HWND window) {
 	nid.hWnd = window;
 	nid.uID = 1;
 	nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-	nid.hIcon = LoadIcon(instance, MAKEINTRESOURCE(IDI_FILESYNC));
+	nid.hIcon = LoadIcon(g_instance, MAKEINTRESOURCE(IDI_FILESYNC));
 	nid.uCallbackMessage = WM_STATUS_NOTIFY;
 	StringCbCopy(nid.szTip, sizeof(nid.szTip), _T("Enabled"));
 	Shell_NotifyIcon(NIM_ADD, &nid);
@@ -117,7 +118,7 @@ static void UpdateStatusAreaIcon(HWND window) {
 	nid.hWnd = window;
 	nid.uID = 1;
 	nid.uFlags = NIF_ICON | NIF_TIP;
-	nid.hIcon = LoadIcon(instance, MAKEINTRESOURCE(enabled ? IDI_FILESYNC : IDI_NOFILESYNC));
+	nid.hIcon = LoadIcon(g_instance, MAKEINTRESOURCE(enabled ? IDI_FILESYNC : IDI_NOFILESYNC));
 	StringCbCopy(nid.szTip, sizeof(nid.szTip), enabled ? _T("Enabled") : _T("Disabled"));
 	Shell_NotifyIcon(NIM_MODIFY, &nid);
 }
@@ -170,7 +171,7 @@ static INT_PTR CALLBACK AboutProcedure(HWND dialog, UINT messageId, WPARAM wPara
 		// Allow the system to set the focus.
 		return TRUE;
 	case WM_GETICON:
-		SetWindowLongPtr(dialog, DWL_MSGRESULT, (LONG_PTR)LoadIcon(instance, MAKEINTRESOURCE(wParam == ICON_BIG ? IDR_MAINFRAME : IDI_FILESYNC)));
+		SetWindowLongPtr(dialog, DWL_MSGRESULT, (LONG_PTR)LoadIcon(g_instance, MAKEINTRESOURCE(wParam == ICON_BIG ? IDR_MAINFRAME : IDI_FILESYNC)));
 		return TRUE;
 	}
 	return FALSE;
@@ -209,7 +210,7 @@ static LRESULT CALLBACK WindowProcedure(HWND window, UINT messageId, WPARAM wPar
 			UpdateStatusAreaIcon(window);
 			break;
 		case IDM_ABOUT:
-			DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), window, AboutProcedure);
+			DialogBox(g_instance, MAKEINTRESOURCE(IDD_ABOUTBOX), window, AboutProcedure);
 			break;
 		case IDM_EXIT:
 			PostMessage(window, WM_CLOSE, 0, 0);
@@ -243,10 +244,8 @@ static LRESULT CALLBACK WindowProcedure(HWND window, UINT messageId, WPARAM wPar
 	return 0;
 }
 
-#pragma warning(disable: 4459) // declaration of 'instance' hides global declaration
-
 int APIENTRY _tWinMain(HINSTANCE instance, HINSTANCE /*previousInstance*/, LPTSTR /*commandLine*/, int /*showCommand*/) {
-	::instance = instance;
+	g_instance = instance;
 	taskbarCreatedMessageId = RegisterWindowMessage(_T("TaskbarCreated"));
 
 	// Initialize the common controls to get the new theme.

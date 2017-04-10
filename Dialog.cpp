@@ -2,8 +2,6 @@
 #include "FileSync.h"
 #include "Dialog.h"
 
-static HINSTANCE instance;
-
 struct LAYOUT
 {
 	UINT id;
@@ -223,7 +221,7 @@ static INT_PTR CALLBACK SelectProcedure(HWND dialog, UINT messageId, WPARAM wPar
 		return OnInitDialog(dialog, NULL, lParam);
 	case WM_GETICON:
 		SetWindowLongPtr(dialog, DWL_MSGRESULT,
-			(LONG_PTR)LoadIcon(instance, MAKEINTRESOURCE(wParam == ICON_BIG ? IDR_MAINFRAME : IDI_FILESYNC)));
+			(LONG_PTR)LoadIcon(g_instance, MAKEINTRESOURCE(wParam == ICON_BIG ? IDR_MAINFRAME : IDI_FILESYNC)));
 		return TRUE;
 	}
 	return FALSE;
@@ -231,7 +229,6 @@ static INT_PTR CALLBACK SelectProcedure(HWND dialog, UINT messageId, WPARAM wPar
 
 bool Dialog::SelectFiles(HWND window, std::vector<Entry>& entries)
 {
-	instance= GetModuleHandle(NULL);
-	DialogBoxParam(instance, MAKEINTRESOURCE(IDD_FILESYNC_DIALOG), window, SelectProcedure, (LPARAM)&entries);
+	DialogBoxParam(g_instance, MAKEINTRESOURCE(IDD_FILESYNC_DIALOG), window, SelectProcedure, (LPARAM)&entries);
 	return true;
 }
